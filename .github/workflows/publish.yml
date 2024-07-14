@@ -74,12 +74,14 @@ jobs:
         echo "Next version: $NEXT_VERSION"
         echo ::set-output name=next_version::$NEXT_VERSION
 
+    - name: Update .csproj version
+      run: |
+        NEXT_VERSION=${{ steps.next_version.outputs.next_version }}
+        sed -i "s/<Version>.*<\/Version>/<Version>$NEXT_VERSION<\/Version>/" ${{ env.PROJECT_PATH }}
+
 
     - name: Pack
       run: dotnet pack --no-build --configuration Release --output ./output
-    
-    - name: Action Type
-      run: echo github.event.release.type
 
     - name: Publish to GitHub Packages
       run: dotnet nuget push ./output/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
