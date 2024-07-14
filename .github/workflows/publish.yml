@@ -79,24 +79,17 @@ jobs:
         NEXT_VERSION=${{ steps.next_version.outputs.next_version }}
         sed -i "s/<Version>.*<\/Version>/<Version>$NEXT_VERSION<\/Version>/" ${{ env.PROJECT_PATH }}
 
-    - name: Output user details
-      run: echo "user details ${{ vars.username }} ${{ vars.email }}"
-
-    - name: Set branch name
-      id: branch_name
-      run: echo ::set-output name=branch::${GITHUB_REF#refs/heads/}
-
     - name: Output branch name
       run: echo "Current branch is ${GITHUB_REF##*/}"
 
-    - name: Commit version increment
-      run: |
-          git config --global user.name '${{ vars.username }}'
-          git config --global user.email '${{ vars.email }}'
-          git add ${{ env.PROJECT_PATH }}
-          git commit -m "Increment version to ${{ steps.next_version.outputs.next_version }}"
-          git tag v${{ steps.next_version.outputs.next_version }}
-          git push origin 14-07-2024-Initia-Code --tags
+    # - name: Commit version increment
+    #   run: |
+    #       git config --global user.name '${{ vars.username }}'
+    #       git config --global user.email '${{ vars.email }}'
+    #       git add ${{ env.PROJECT_PATH }}
+    #       git commit -m "Increment version to ${{ steps.next_version.outputs.next_version }}"
+    #       git tag v${{ steps.next_version.outputs.next_version }}
+    #       git push origin main --tags
 
     - name: Pack
       run: dotnet pack --no-build --configuration Release --output ./output
