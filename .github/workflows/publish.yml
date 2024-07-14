@@ -17,7 +17,7 @@ permissions:
 
 env:
   PROJECT_PATH: "nugetwithgithub/nugetwithgithub.csproj"
-  PACKAGE_OUTPUT_DIR: ${{ github.workspace }}\output
+  PACKAGE_OUTPUT_DIR: ${{ github.workspace }}
   NUGET_SOURCE_URL: "https://github.com/learnedbylife/nugetwithgithub"
 
 jobs:
