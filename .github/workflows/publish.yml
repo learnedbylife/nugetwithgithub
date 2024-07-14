@@ -1,0 +1,55 @@
+name: "Deploy to NuGet"
+
+on:
+   push:
+    branches:
+      - main
+   pull_request:
+     branches:
+      - main
+   release:
+    types:
+      - published
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  PROJECT_PATH: "nugetwithgithub/nugetwithgithub.csproj"
+  PACKAGE_OUTPUT_DIR: ${{ github.workspace }}/output
+  NUGET_SOURCE_URL: "https://github.com/learnedbylife/nugetwithgithub"
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: "ubuntu-latest"
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Install Dotnet"
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: "Restore package"
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: "Build package"
+      run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
+
+    - name: Set Version Number
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Pack
+      run: dotnet pack --no-build --configuration Release --output ./output
+
+    - name: Publish to GitHub Packages
+      run: dotnet nuget push ./output/*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+
+    # - name: "Pack project"
+    #   run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build --configuration Release --include-symbols --output ${{ env.PACKAGE_OUTPUT_DIR }}
+
+    # - name: "Push package"
+    #   run: dotnet nuget push ${{ env.PACKAGE_OUTPUT_DIR }}\*.nupkg --api-key ${{ secrets.NUGET_AUTH_TOKEN }} -s ${{ env.NUGET_SOURCE_URL }}
