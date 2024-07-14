@@ -56,7 +56,7 @@ jobs:
     - name: Update .csproj version
       run: |
           NEXT_VERSION=${{ steps.next_version.outputs.next_version }}
-          sed -i "s/<Version>.*<\/Version>/<Version>$NEXT_VERSION<\/Version>/"${{ env.PROJECT_PATH}}
+          sed -i "s/<Version>.*<\/Version>/<Version>$NEXT_VERSION<\/Version>/" ${{ env.PROJECT_PATH}}
 
     - name: Commit version increment
       run: |
