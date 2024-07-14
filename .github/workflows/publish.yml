@@ -17,7 +17,7 @@ permissions:
 
 env:
   PROJECT_PATH: "nugetwithgithub/nugetwithgithub.csproj"
-  PACKAGE_OUTPUT_DIR: ${{ github.workspace }}
+  PACKAGE_OUTPUT_DIR: ${{ github.workspace }}/output
   NUGET_SOURCE_URL: "https://github.com/learnedbylife/nugetwithgithub"
 
 jobs:
@@ -42,12 +42,11 @@ jobs:
     - name: Set Version Number
       run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-    - name: Generate NuGet package
-      run: |  
-          dotnet pack ./${{vars.PACKAGE_NAMESPACE}} -c Release -o out /p:Version=${{ env.RELEASE_VERSION }}
+    - name: Pack
+      run: dotnet pack --no-build --configuration Release --output ./output
 
-    - name: Push Package
-      run: dotnet nuget push ./out/*.nupkg --skip-duplicate --no-symbols --api-key ${{secrets.GITHUB_TOKEN}} 
+    - name: Publish to GitHub Packages
+      run: dotnet nuget push ./output/*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     # - name: "Pack project"
     #   run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build --configuration Release --include-symbols --output ${{ env.PACKAGE_OUTPUT_DIR }}
