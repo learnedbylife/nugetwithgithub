@@ -80,12 +80,12 @@ jobs:
         sed -i "s/<Version>.*<\/Version>/<Version>$NEXT_VERSION<\/Version>/" ${{ env.PROJECT_PATH }}
 
     - name: Output user details
-      run: echo "user details ${{ secrets.username }} ${{ secrets.email }}"
+      run: echo "user details ${{ vars.username }} ${{ vars.email }}"
 
     - name: Commit version increment
       run: |
-          git config --global user.name '${{ secrets.username }}'
-          git config --global user.email '${{ secrets.email }}'
+          git config --global user.name '${{ vars.username }}'
+          git config --global user.email '${{ vars.email }}'
           git add ${{ env.PROJECT_PATH }}
           git commit -m "Increment version to ${{ steps.next_version.outputs.next_version }}"
           git tag v${{ steps.next_version.outputs.next_version }}
