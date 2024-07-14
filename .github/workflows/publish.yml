@@ -44,6 +44,9 @@ jobs:
 
     - name: Pack
       run: dotnet pack --no-build --configuration Release --output ./output
+    
+    - name: Action Type
+      run: echo github.event.release.type
 
     - name: Publish to GitHub Packages
       if: github.event.release.type == 'published'
