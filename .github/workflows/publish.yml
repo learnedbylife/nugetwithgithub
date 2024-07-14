@@ -11,6 +11,9 @@ on:
     types:
       - published
 
+permissions:
+  id-token: write
+  contents: read
 
 env:
   PROJECT_PATH: "nugetwithgithub/nugetwithgithub.csproj"
