@@ -46,7 +46,7 @@ jobs:
       run: dotnet pack --no-build --configuration Release --output ./output
 
     - name: Publish to GitHub Packages
-      run: dotnet nuget push ./output/*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      run: dotnet nuget push ./output/*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     # - name: "Pack project"
     #   run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build --configuration Release --include-symbols --output ${{ env.PACKAGE_OUTPUT_DIR }}
