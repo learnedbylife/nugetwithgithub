@@ -82,6 +82,13 @@ jobs:
     - name: Output user details
       run: echo "user details ${{ vars.username }} ${{ vars.email }}"
 
+    - name: Set branch name
+      id: branch_name
+      run: echo ::set-output name=branch::${GITHUB_REF#refs/heads/}
+
+    - name: Output branch name
+      run: echo "Current branch is ${{ steps.branch_name.outputs.branch }}"
+
     - name: Commit version increment
       run: |
           git config --global user.name '${{ vars.username }}'
