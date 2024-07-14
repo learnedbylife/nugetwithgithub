@@ -1,12 +1,12 @@
 name: "Deploy to NuGet"
 
 on:
-   # push:
-   #  branches:
-   #    - main
-   # pull_request:
-   #   branches:
-   #    - main
+   push:
+    branches:
+      - main
+   pull_request:
+     branches:
+      - main
    release:
     types:
       - published
@@ -47,6 +47,27 @@ jobs:
 
     - name: Output latest tag
       run: echo "Latest tag is ${{ steps.latest_tag.outputs.tag }}"
+    
+    - name: Calculate next version
+      id: next_version
+      run: |
+          # Get the latest tag
+          LATEST_TAG=${{ steps.get_tag.outputs.tag }}
+          echo "Latest 1 tag is ${{ LATEST_TAG }}"
+          
+          # Extract the version numbers
+          IFS='.' read -r -a VERSION_PARTS <<< "$LATEST_TAG"
+          echo "Latest 2 tag is ${{ IFS }}"
+          
+          # Increment the patch version
+          PATCH_VERSION=$((VERSION_PARTS[2]+1))
+          echo "Latest 2 tag is ${{ PATCH_VERSION }}"
+          
+          # Set the next version
+          NEXT_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$PATCH_VERSION"
+          echo "Next version: $NEXT_VERSION"
+          echo "Latest 3 tag is ${{ NEXT_VERSION }}"
+          echo ::set-output name=next_version::$NEXT_VERSION
 
     - name: Pack
       run: dotnet pack --no-build --configuration Release --output ./output
