@@ -39,8 +39,14 @@ jobs:
     - name: "Build package"
       run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
 
-    # - name: Set Version Number
-    #   run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - name: Get latest tag
+      id: latest_tag
+      run: |
+          git fetch --tags
+          echo ::set-output name=tag::$(git describe --tags `git rev-list --tags --max-count=1`)
+
+    - name: Output latest tag
+      run: echo "Latest tag is ${{ steps.latest_tag.outputs.tag }}"
 
     - name: Pack
       run: dotnet pack --no-build --configuration Release --output ./output
@@ -49,7 +55,7 @@ jobs:
       run: echo github.event.release.type
 
     - name: Publish to GitHub Packages
-      run: dotnet nuget push ./output/*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      run: dotnet nuget push ./output/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     # - name: "Pack project"
     #   run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build --configuration Release --include-symbols --output ${{ env.PACKAGE_OUTPUT_DIR }}
