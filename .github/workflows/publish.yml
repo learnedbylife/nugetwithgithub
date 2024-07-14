@@ -53,10 +53,26 @@ jobs:
           echo "Next version: $NEXT_VERSION"
           echo ::set-output name=next_version::$NEXT_VERSION
 
+    - name: Debug output
+      run: |
+          echo "Next version is ${{ steps.next_version.outputs.next_version }}"
+
     - name: Update .csproj version
       run: |
           NEXT_VERSION=${{ steps.next_version.outputs.next_version }}
           sed -i "s/<Version>.*<\/Version>/<Version>$NEXT_VERSION<\/Version>/" ${{ env.PROJECT_PATH}}
+          cat ${{ env.PROJECT_PATH}}
+    - name: Check for changes
+      id: changes
+      run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git diff
+          if git diff --exit-code; then
+            echo "::set-output name=changed::false"
+          else
+            echo "::set-output name=changed::true"
+          fi
 
     - name: Commit version increment
       run: |
@@ -73,8 +89,8 @@ jobs:
     - name: "Build package"
       run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
 
-    - name: Set Version Number
-      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    # - name: Set Version Number
+    #   run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
     - name: Pack
       run: dotnet pack --no-build --configuration Release --output ./output
