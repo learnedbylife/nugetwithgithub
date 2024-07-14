@@ -8,7 +8,8 @@ on:
      branches:
       - main
    release:
-    types: [published, created, edited]
+    types:
+      - published
 
 permissions:
   id-token: write
@@ -48,9 +49,7 @@ jobs:
       run: echo github.event.release.type
 
     - name: Publish to GitHub Packages
-      if: github.event.release.type == 'published'
-      run: |
-          dotnet nuget push ./output/*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      run: dotnet nuget push ./output/*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     # - name: "Pack project"
     #   run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build --configuration Release --include-symbols --output ${{ env.PACKAGE_OUTPUT_DIR }}
