@@ -39,7 +39,7 @@ jobs:
     - name: "Build package"
       run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
 
-    - name: Get latest tag
+    - name: Get latest tag 
       id: latest_tag
       run: |
           git fetch --tags
