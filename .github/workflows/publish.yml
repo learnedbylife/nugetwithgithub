@@ -32,57 +32,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '8.0.x'
-    - name: Get the latest tag
-      id: get_tag
-      run: echo ::set-output name=tag::$(git describe --tags `git rev-list --tags --max-count=1`)
-
-    - name: Calculate next version
-      id: next_version
-      run: |
-          # Get the latest tag
-          LATEST_TAG=${{ steps.get_tag.outputs.tag }}
-          
-          # Extract the version numbers
-          IFS='.' read -r -a VERSION_PARTS <<< "$LATEST_TAG"
-          
-          # Increment the patch version
-          PATCH_VERSION=$((VERSION_PARTS[2]+1))
-          
-          # Set the next version
-          NEXT_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$PATCH_VERSION"
-          echo "Next version: $NEXT_VERSION"
-          echo ::set-output name=next_version::$NEXT_VERSION
-
-    - name: Debug output
-      run: |
-          echo "Next version is ${{ steps.next_version.outputs.next_version }}"
-
-    - name: Update .csproj version
-      run: |
-          NEXT_VERSION=${{ steps.next_version.outputs.next_version }}
-          sed -i "s/<Version>.*<\/Version>/<Version>$NEXT_VERSION<\/Version>/" ${{ env.PROJECT_PATH}}
-          cat ${{ env.PROJECT_PATH}}
-    - name: Check for changes
-      id: changes
-      run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git diff
-          if git diff --exit-code; then
-            echo "::set-output name=changed::false"
-          else
-            echo "::set-output name=changed::true"
-          fi
-
-    - name: Commit version increment
-      if: steps.changes.outputs.changed == 'true'
-      run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add ${{ env.PROJECT_PATH}}
-          git commit -m "Increment version to ${{ steps.next_version.outputs.next_version }}"
-          git tag v${{ steps.next_version.outputs.next_version }}
-          git push origin main --tags
 
     - name: "Restore package"
       run: dotnet restore ${{ env.PROJECT_PATH }}
@@ -97,7 +46,9 @@ jobs:
       run: dotnet pack --no-build --configuration Release --output ./output
 
     - name: Publish to GitHub Packages
-      run: dotnet nuget push ./output/*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      if: github.event.release.type == 'published'
+      run: |
+          dotnet nuget push ./output/*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     # - name: "Pack project"
     #   run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build --configuration Release --include-symbols --output ${{ env.PACKAGE_OUTPUT_DIR }}
